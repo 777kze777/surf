@@ -219,7 +219,7 @@ script.onload = async function() {
       dataUrl:            brotliBlobUrl(dataBytes, DATA_FILE + ".data.br"),
       frameworkUrl:       CDN + "/" + FRAMEWORK + ".framework.js",
       codeUrl:            brotliBlobUrl(wasmBytes,  WASM_FILE + ".wasm.br"),
-      streamingAssetsUrl: "https://cdn.jsdelivr.net/gh/777kze777/surf@main/StreamingAssets",
+      streamingAssetsUrl: "https://cdn.jsdelivr.net/gh/777kze777/surf@d584fd4/StreamingAssets",
       companyName:        "Kot Games",
       productName:        "Surf GO",
       productVersion:     "3.411",
