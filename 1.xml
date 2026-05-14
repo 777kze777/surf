@@ -186,18 +186,31 @@ var dpr = isMobileLike() ? Math.min(0.85 * nativeDPR, nativeDPR) : Math.min(1 * 
 canvas.style.background = "center / cover";
 
 /* ── PART İNDİRME ─────────────────────────────────────────── */
-async function fetchParts(baseUrl, partCount, label) {
+async function fetchParts(urls, label) {
   var parts = [];
-  for (var i = 0; i < partCount; i++) {
-    loaderLabel.textContent = label + ' ' + (i+1) + '/' + partCount + '...';
-    var r = await fetch(baseUrl + '.part' + i);
-    if (!r.ok) throw new Error('part' + i + ': HTTP ' + r.status);
+
+  for (var i = 0; i < urls.length; i++) {
+    loaderLabel.textContent = label + ' ' + (i + 1) + '/' + urls.length + '...';
+
+    var r = await fetch(urls[i]);
+
+    if (!r.ok) {
+      throw new Error('Part failed: ' + urls[i] + ' HTTP ' + r.status);
+    }
+
     parts.push(new Uint8Array(await r.arrayBuffer()));
   }
-  var total = parts.reduce(function(s,p){ return s + p.length; }, 0);
+
+  var total = parts.reduce(function(s, p) { return s + p.length; }, 0);
   var merged = new Uint8Array(total);
   var off = 0;
-  for (var j = 0; j < parts.length; j++) { merged.set(parts[j], off); off += parts[j].length; }
+
+  for (var j = 0; j < parts.length; j++) {
+    merged.set(parts[j], off);
+    off += parts[j].length;
+    parts[j] = null;
+  }
+
   return merged;
 }
 
@@ -212,8 +225,23 @@ script.src = CDN + "/" + LOADER + ".loader.js";
 script.onload = async function() {
   try {
     loaderLabel.textContent = "Downloading game data...";
-    var dataBytes = await fetchParts(CDN + "/" + DATA_FILE + ".data.br", DATA_PARTS, "Data");
-    var wasmBytes = await fetchParts(CDN + "/" + WASM_FILE + ".wasm.br", WASM_PARTS, "WASM");
+    var DATA_URLS = [
+      "https://cdn.jsdelivr.net/gh/777kze777/surf@d584fd4/Build/b8181f262369a6bf3089d895b5d32586.data.br.part0",
+      "https://cdn.jsdelivr.net/gh/777kze777/surf@d584fd4/Build/b8181f262369a6bf3089d895b5d32586.data.br.part1",
+      "https://cdn.jsdelivr.net/gh/777kze777/surf@d584fd4/Build/b8181f262369a6bf3089d895b5d32586.data.br.part2"
+    ];
+
+    var WASM_URLS = [
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part0",
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part1",
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part2",
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part3",
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part4",
+      "https://cdn.jsdelivr.net/gh/z799gs/66443488@bf4c67b/0201508d745b324b5b1459f0c1d7b89c.wasm.br.part5"
+    ];
+
+    var dataBytes = await fetchParts(DATA_URLS, "Data");
+    var wasmBytes = await fetchParts(WASM_URLS, "WASM");
 
     var config = {
       dataUrl:            brotliBlobUrl(dataBytes, DATA_FILE + ".data.br"),
